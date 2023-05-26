@@ -6,12 +6,12 @@ from dotenv import load_dotenv
 import binascii
 import jwt
 from flask_cors import CORS, cross_origin
-from ecdsa import SigningKey, SECP256k1
 
+from ecdsa import SigningKey, SECP256k1
 load_dotenv()
 
-app = Flask(__name__)
-cors = CORS(app, resources={r"/*": {"origins": "*"}})
+app=Flask(__name__)
+cors = CORS(app)
 
 @app.route("/upload-image-to-deso", methods=["POST"])
 @cross_origin()
@@ -37,7 +37,7 @@ def upload_image_to_deso():
         tempFile = open(file_path, "rb")
         imageFileList = [
             ('file', ('screenshot.jpg', tempFile, 'image/png'))]
-        jwt_ = getDeSoJWT()
+        jwt_ = getDeSoJWT(os.getenv('EVENTER_SEED_HEX'))
         endpointURL = "https://node.deso.org/api/v0/upload-image"
         payload = {
             "UserPublicKeyBase58Check": os.getenv('EVENTER_PUBLIC_KEY'),
@@ -65,20 +65,14 @@ def upload_image_to_deso():
             status=500,
             mimetype='application/json'
         )
-
-@app.route("/scrapbook", methods=["POST", "GET"])
+    
+@app.route("/scrapbook", methods=["POST","GET"])
 @cross_origin()
-def getDeSoJWT():
-    # Retrieve the seed hex from environment variables
-    seedHex = os.getenv('EVENTER_SEED_HEX')
-
-    # Rest of your function implementation
+def getDeSoJWT(seedHex):
+    # returns JWT token of user that helps in public key validation in backend
     private_key = bytes(seedHex, "utf-8")
     private_key = binascii.unhexlify(private_key)
     key = SigningKey.from_string(private_key, curve=SECP256k1)
     key = key.to_pem()
     encoded_jwt = jwt.encode({}, key, algorithm="ES256")
     return encoded_jwt
-
-if __name__ == "__main__":
-    app.run()
