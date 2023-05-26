@@ -10,7 +10,7 @@ from flask_cors import CORS, cross_origin
 from ecdsa import SigningKey, SECP256k1
 load_dotenv()
 
-app=Flask(_name_)
+app=Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route("/upload-image-to-deso", methods=["POST"])
