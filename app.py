@@ -5,13 +5,16 @@ import os
 from dotenv import load_dotenv
 import binascii
 import jwt
+from flask_cors import CORS, cross_origin
 
 from ecdsa import SigningKey, SECP256k1
 load_dotenv()
 
-app=Flask(__name__)
+app=Flask(_name_)
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route("/upload-image-to-deso", methods=["POST"])
+@cross_origin()
 def upload_image_to_deso():
     try:
         if 'file' not in request.files:
@@ -64,6 +67,7 @@ def upload_image_to_deso():
         )
     
 @app.route("/scrapbook", methods=["POST","GET"])
+@cross_origin()
 def getDeSoJWT(seedHex):
     # returns JWT token of user that helps in public key validation in backend
     private_key = bytes(seedHex, "utf-8")
